@@ -11,8 +11,8 @@ Y_COORDINATE = 1
 SAMPLE_SIZE = 32  # I wish to change this along the way
 groups = [[], []]
 GROUP_SIZE = 32
-NUM_ITERATIONS = 40
-LEARNING_RATE = 0.07  # that to o
+NUM_ITERATIONS = 400000
+LEARNING_RATE = 0.0001  # that to o
 VECTORS_TO_SHOW = min(20, NUM_ITERATIONS)
 HISTORY_TO_SHOW = min(NUM_ITERATIONS, 1000)
 
@@ -37,28 +37,7 @@ side - first group needs to be bellow vector,second group above vector
 
 
 def Distance(m, n, px, py, side):
-    return max(0, side * (m * px - py + n) / ((m ** 2 + 1) ** 0.5))  # (m*px+n-py)*side)#
-
-
-"""
-Loss Sum (= distance sum)
-"""
-
-'''
-def LossSum(a, b, ps):
-    sum = 0
-    for i in range(len(ps[FIRST_GROUP])):
-        sum += Distance(a, b, ps[FIRST_GROUP][i][X_COORDINATE], ps[FIRST_GROUP][i][Y_COORDINATE], 1)
-    for i in range(len(ps[SECOND_GROUP])):
-        sum += Distance(a, b, ps[SECOND_GROUP][i][X_COORDINATE], ps[SECOND_GROUP][i][Y_COORDINATE], -1)
-    return sum'''
-
-
-"""
-new a or new b caluted based on gradient
-y is the loss
-"""
-
+    return max(0, (side )* (((m * px) - py + n) / (((m ** 2) + 1) ** 0.5)))  # (m*px+n-py)*side)#
 
 
 
@@ -68,7 +47,6 @@ Get sample from a group
 
 
 def GetSample(groups):
-    return groups
     samples = [[], []]
     samples[FIRST_GROUP] = random.sample(groups[FIRST_GROUP], SAMPLE_SIZE)
     samples[SECOND_GROUP] = random.sample(groups[SECOND_GROUP], SAMPLE_SIZE)
@@ -77,9 +55,9 @@ def GetSample(groups):
 
 def GetAGradient(sample, m, n):
     try:
-       helper = m ** 2 + 1
+        helper = m ** 2 + 1
     except:
-       return 0,0
+        return 0, 0
 
     derivative = 0
     sumLoss = 0
@@ -91,17 +69,16 @@ def GetAGradient(sample, m, n):
             sumLoss += loss
             derivative -= (x0 * (helper ** 0.5) - m * (m * x0 - y0 + n) / helper ** 0.5) / (helper)
 
+
     for point in sample[SECOND_GROUP]:
         x0 = point[X_COORDINATE]
         y0 = point[Y_COORDINATE]
         loss = Distance(m, n, x0, y0, 1)
-        if(loss>0):
+        if (loss > 0):
             sumLoss += loss
-            derivative += (x0 * (helper ** 0.5) - m * (m * x0 - y0 + n) / helper ** 0.5) / (helper)
+            derivative += ((x0 * (helper ** 0.5)) - (m * (m * x0 - y0 + n)) / helper ** 0.5) / (helper)
 
     return sumLoss, derivative
-
-
 
 
 def GetBGradient(sample, m, n):
@@ -109,9 +86,9 @@ def GetBGradient(sample, m, n):
     sumLoss = 0
 
     try:
-       helper = m ** 2 + 1
+        helper = m ** 2 + 1
     except:
-       return 0,0
+        return 0, 0
 
     for point in sample[FIRST_GROUP]:
         x0 = point[X_COORDINATE]
@@ -119,27 +96,27 @@ def GetBGradient(sample, m, n):
         loss = Distance(m, n, x0, y0, -1)
         if (loss > 0):
             sumLoss += loss
-            derivative -= 1 / (helper**0.5)
+            derivative -= 1 / (helper ** 0.5)
 
     for point in sample[SECOND_GROUP]:
         x0 = point[X_COORDINATE]
         y0 = point[Y_COORDINATE]
         loss = Distance(m, n, x0, y0, 1)
-        if(loss>0):
+        if (loss > 0):
             sumLoss += loss
-            derivative += 1 / (helper**0.5)
+            derivative += 1 / (helper ** 0.5)
 
     return sumLoss, derivative
 
 
 # random initial step
-a = random.uniform(-3,3)
-b = random.uniform(-4,4)
+a = random.uniform(-3, 3)
+b = random.uniform(-4, 4)
 xx = np.linspace(-4, 4, 2)
 vectorHistory = []
 vectorHistory.append([xx * a + b, "random"])
 lossHistory = []
-gradHistory = [[],[]]
+gradHistory = [[], []]
 aHistorty = []
 bHistorty = []
 print "start timing"
@@ -147,28 +124,31 @@ tt = -time.clock()
 for i in range(NUM_ITERATIONS):
     sample = GetSample(groups)
 
-    loss, grad = GetAGradient(sample, a, b)
+    totalLoss, grad = GetAGradient(sample, a, b)
 
-    #update a
+    # update a
     if not grad == 0:
-        newA = a - LEARNING_RATE * loss / grad
+        newA = a - LEARNING_RATE * totalLoss / grad
     else:
+
         newA = a
 
     if i % (NUM_ITERATIONS / HISTORY_TO_SHOW) == 0:  # Dont break matplot,dont show 1 million vectors
         gradHistory[0].append(grad)
 
+
     # update b
-    loss, grad =GetBGradient(sample,newA,b)
-    if not grad==0:
-        newB = b - LEARNING_RATE * loss / grad
+    totalLoss, grad = GetBGradient(sample, newA, b)
+    if not grad == 0:
+        newB = b - LEARNING_RATE * totalLoss / grad
     else:
-        newB=b
+        newB = b
+
 
     if i % (NUM_ITERATIONS / HISTORY_TO_SHOW) == 0:  # Dont break matplot,dont show 1 million vectors
         aHistorty.append([a])
         bHistorty.append([b])
-        lossHistory.append(loss)
+        lossHistory.append(totalLoss)
         gradHistory[1].append(grad)
 
     prevA = a
@@ -182,6 +162,14 @@ for i in range(NUM_ITERATIONS):
 
 tt += time.clock()
 print "time passed: ", tt
+
+
+
+
+
+
+### GRAPHS
+
 
 # Vectors on graph
 plt.ylim(-10, 10)
@@ -218,31 +206,34 @@ plt.legend()
 plt.show()
 
 plt.xlabel("Iteration")
-plt.ylabel("Loss")
+plt.ylabel("log Loss")
+plt.semilogy=True
 plt.plot([int(i * NUM_ITERATIONS / HISTORY_TO_SHOW) for i in range(len(lossHistory))], lossHistory, 'k-',
          label="loss @ iteration", color="blue")
 plt.legend()
 plt.show()
 
+plt.semilogy=False
+
 plt.xlabel("Iteration")
-plt.ylabel("grad a")
+plt.ylabel("grad")
 plt.plot([int(i * NUM_ITERATIONS / HISTORY_TO_SHOW) for i in range(len(gradHistory[0]))], gradHistory[0], 'k-',
-         label="grad @ iteration", color="purple")
+         label="grad of a @ iteration", color="purple")
 plt.legend()
 plt.show()
 
 plt.xlabel("Iteration")
-plt.ylabel("grad b")
+plt.ylabel("grad")
 plt.plot([int(i * NUM_ITERATIONS / HISTORY_TO_SHOW) for i in range(len(gradHistory[1]))], gradHistory[1], 'k-',
-         label="grad @ iteration", color="purple")
+         label="grad of b@ iteration", color="purple")
 plt.legend()
 plt.show()
 
-
-
+'''
 plt.xlabel("gradient")
 plt.ylabel("loss")
 plt.scatter(np.array(lossHistory), np.array(gradHistory[0]), c="a gradient")
 plt.scatter(np.array(lossHistory), np.array(gradHistory[1]), c="b gradient")
 plt.legend()
 plt.show()
+'''
