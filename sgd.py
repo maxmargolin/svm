@@ -11,8 +11,8 @@ Y_COORDINATE = 1
 SAMPLE_SIZE = 32  # I wish to change this along the way
 groups = [[], []]
 GROUP_SIZE = 32
-NUM_ITERATIONS = 400000
-LEARNING_RATE = 0.0001  # that to o
+NUM_ITERATIONS = 4000
+LEARNING_RATE = 0.01  # that to o
 VECTORS_TO_SHOW = min(20, NUM_ITERATIONS)
 HISTORY_TO_SHOW = min(NUM_ITERATIONS, 1000)
 

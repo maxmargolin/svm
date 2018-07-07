@@ -3,6 +3,7 @@ import random
 
 
 data=[]
+#x,y,bias
 for _ in range(1,100):
     data.append([[random.uniform(2, 4), random.uniform(2, 4), -1], -1])
     data.append([[random.uniform(5, 7), random.uniform(4, 7), -1], 1])
@@ -41,5 +42,5 @@ def svm(XY):
 
 
 w = svm(XY)
-print(w)
-print "success "+test(w,np.array(XY[:, 0]), np.array(XY[:, 1]))*100+"%"
+print "vector:", w
+print "success in test "+str(test(w,np.array(XY[:, 0]), np.array(XY[:, 1]))*100)+"%"
